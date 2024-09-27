@@ -34,6 +34,17 @@ let DUMMY_PLACES = [
     },
     creator: "engracia",
   },
+  {
+    id: "place4",
+    title: "Costco Wholesale",
+    description: "One of the best wholesale store in the GTA.",
+    address: "1411 Warden Ave., Toronto, ON M1R 2S3",
+    location: {
+      lat: 43.7594111,
+      lng: -79.3001851,
+    },
+    creator: "engracia",
+  },
 ];
 
 const getPlaceById = (req, res, next) => {
@@ -51,4 +62,19 @@ const getPlaceById = (req, res, next) => {
   res.json(place);
 };
 
+const getPlacesByUserId = (req, res, next) => {
+  const userId = req.params.uid;
+
+  const places = DUMMY_PLACES.filter((p) => p.creator === userId);
+
+  if (!places || places.length === 0) {
+    return next(
+      new HttpError("Could not find places for the provided user id.", 404)
+    );
+  }
+
+  res.json({ places });
+};
+
 exports.getPlaceById = getPlaceById;
+exports.getPlacesByUserId = getPlacesByUserId;
