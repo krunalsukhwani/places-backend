@@ -2,6 +2,7 @@ const { v4: uuidv4 } = require("uuid");
 const HttpError = require("../models/http-error");
 const { validationResult } = require("express-validator");
 const getLocationForAddress = require("../util/location");
+const Place = require("../models/place");
 
 let DUMMY_PLACES = [
   {
@@ -97,16 +98,20 @@ const createPlace = async (req, res, next) => {
     return next(error);
   }
 
-  const newPlace = {
-    id: uuidv4(),
+  const newPlace = new Place({
     title,
     description,
-    address,
-    location,
+    address, 
     creator,
-  };
+    location,
+    image: 'https://commondatastorage.googleapis.com/codeskulptor-assets/gutenberg.jpg'
+  });
 
-  DUMMY_PLACES.push(newPlace);
+  try{
+    await newPlace.save();
+  }catch(err){
+    return next(new HttpError("Creating place failed, please try again later!", 500));
+  }
 
   res.status(201).json({ place: newPlace });
 };
