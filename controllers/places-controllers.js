@@ -71,21 +71,31 @@ const getPlaceById = async (req, res, next) => {
     ));
   }
 
-  res.json(place);
+  //if you want to access only id not _id then convert place object with getters
+  res.json({place: place.toObject({ getters: true })});
 };
 
-const getPlacesByUserId = (req, res, next) => {
+const getPlacesByUserId = async (req, res, next) => {
+  //get user id from the query parameter
   const userId = req.params.uid;
 
-  const places = DUMMY_PLACES.filter((p) => p.creator === userId);
-
+  //get the places from the mongodb based on creator
+  let places;
+  try{
+    places = await Place.find({ creator : userId });
+  }catch(err){
+    return next(new HttpError("Something went wrong, could not find places", 500));
+  }
+  
+  //display error message if places are not available for the given creator
   if (!places || places.length === 0) {
     return next(
       new HttpError("Could not find places for the provided user id.", 404)
     );
   }
 
-  res.json({ places });
+  //add getters for the id
+  res.json({ places: places.map(place => place.toObject({getters : true}))});
 };
 
 const createPlace = async (req, res, next) => {
