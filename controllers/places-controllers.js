@@ -51,16 +51,24 @@ let DUMMY_PLACES = [
   },
 ];
 
-const getPlaceById = (req, res, next) => {
+const getPlaceById = async (req, res, next) => {
+  //get place id from query parameters
   const placeId = req.params.pid;
 
-  const place = DUMMY_PLACES.find((p) => p.id === placeId);
+  //get place information based on place id from mongodb
+  let place;
+  try {
+    place = await Place.findById(placeId);
+  }catch(err){
+    return next(new HttpError("Something went wrong, Could not find the place.", 500));
+  }
 
+  //dislay error message if place doesn't exist in the mongodb for the provided place id
   if (!place) {
-    throw new HttpError(
+    return next(new HttpError(
       "Could not find the place for the provided place id.",
       404
-    );
+    ));
   }
 
   res.json(place);
